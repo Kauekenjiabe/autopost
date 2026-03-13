@@ -416,23 +416,29 @@
   /* ── MODAL ── */
   .modal-overlay {
     position: fixed; inset: 0;
-    background: #00000088;
+    background: rgba(0,0,0,0.75);
     backdrop-filter: blur(4px);
-    z-index: 500;
-    display: none; align-items: center; justify-content: center;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
   }
   .modal-overlay.open { display: flex; }
   .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: #1a1a24;
+    border: 1px solid #ffffff18;
     border-radius: var(--radius);
     padding: 32px;
-    width: 480px;
-    max-width: 90vw;
+    width: 100%;
+    max-width: 460px;
+    position: relative;
+    z-index: 10000;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.8);
     animation: modalIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   @keyframes modalIn { from { transform: scale(0.9) translateY(20px); opacity: 0; } }
-  .modal-title { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
   .modal-sub { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 24px; }
   .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
 
@@ -733,33 +739,40 @@
 </main>
 
 <!-- MODAL: Add Profile -->
-<div class="modal-overlay" id="modal-add-profile">
-  <div class="modal">
-    <div class="modal-title">Adicionar perfil</div>
+<div class="modal-overlay" id="modal-add-profile" onclick="handleOverlayClick(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div class="modal-title">➕ Adicionar perfil</div>
+      <button onclick="closeModal()" style="background:none;border:none;color:var(--text-muted);font-size:1.4rem;cursor:pointer;line-height:1;padding:4px 8px;border-radius:6px" onmouseover="this.style.background='#ffffff10'" onmouseout="this.style.background='none'">×</button>
+    </div>
     <div class="modal-sub">Informe os dados do perfil que deseja gerenciar</div>
 
-    <div class="input-group" style="margin-bottom:14px">
+    <div class="input-group" style="margin-bottom:16px">
       <div class="input-label">Plataforma</div>
-      <select class="input-field" id="new-profile-platform">
-        <option value="tiktok">TikTok</option>
-        <option value="instagram">Instagram</option>
-        <option value="facebook">Facebook</option>
-        <option value="youtube">YouTube Shorts</option>
+      <select class="input-field" id="new-profile-platform" style="cursor:pointer">
+        <option value="tiktok">🎵 TikTok</option>
+        <option value="instagram">📸 Instagram</option>
+        <option value="facebook">👤 Facebook</option>
+        <option value="youtube">▶️ YouTube Shorts</option>
       </select>
     </div>
-    <div class="input-group" style="margin-bottom:14px">
+
+    <div class="input-group" style="margin-bottom:16px">
       <div class="input-label">Nome do perfil / @usuário</div>
-      <input type="text" class="input-field" id="new-profile-name" placeholder="@meuperfil">
+      <input type="text" class="input-field" id="new-profile-name" placeholder="@meuperfil" autocomplete="off">
     </div>
+
     <div class="input-group" style="margin-bottom:4px">
-      <div class="input-label">Profile ID (Late API)</div>
-      <input type="text" class="input-field" id="new-profile-id" placeholder="late_profile_xxxxxxxx">
+      <div class="input-label">Profile ID (Late API) <span style="color:var(--text-dim);font-size:0.68rem;text-transform:none;letter-spacing:0">— opcional por enquanto</span></div>
+      <input type="text" class="input-field" id="new-profile-id" placeholder="Deixe em branco se ainda não tiver" autocomplete="off">
     </div>
-    <p style="font-size:0.73rem;color:var(--text-muted);margin:6px 0 0">Encontre em getlate.dev → Connected Profiles</p>
+    <p style="font-size:0.73rem;color:var(--text-muted);margin:6px 0 0;padding:8px 10px;background:#6c63ff10;border-radius:6px;border:1px solid #6c63ff20">
+      💡 O Profile ID você encontra em <strong style="color:var(--accent)">getlate.dev → Connected Profiles</strong> após conectar sua conta. Pode adicionar o perfil agora e editar o ID depois.
+    </p>
 
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="addProfile()">Adicionar</button>
+      <button class="btn btn-primary" onclick="addProfile()">✅ Adicionar perfil</button>
     </div>
   </div>
 </div>
@@ -950,8 +963,12 @@ const PLATFORM_COLORS = { tiktok:'#ff004f', instagram:'#e1306c', facebook:'#1877
 const PLATFORM_NAMES = { tiktok:'TikTok', instagram:'Instagram', facebook:'Facebook', youtube:'YouTube Shorts' };
 const PLATFORM_EMOJIS = { tiktok:'♪', instagram:'📸', facebook:'f', youtube:'▶' };
 
-function openAddProfile() { document.getElementById('modal-add-profile').classList.add('open'); }
+function openAddProfile() {
+  document.getElementById('modal-add-profile').classList.add('open');
+  setTimeout(() => document.getElementById('new-profile-name').focus(), 100);
+}
 function closeModal() { document.getElementById('modal-add-profile').classList.remove('open'); }
+function handleOverlayClick(e) { if (e.target === e.currentTarget) closeModal(); }
 
 function addProfile() {
   const platform = document.getElementById('new-profile-platform').value;
