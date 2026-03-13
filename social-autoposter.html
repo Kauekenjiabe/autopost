@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoPost — Gerencie suas redes em um só lugar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --border: #ffffff0f;
+    --border-hover: #ffffff22;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43e97b;
+    --text: #f0f0f8;
+    --text-muted: #7878a0;
+    --text-dim: #3a3a5c;
+    --tiktok: #ff004f;
+    --instagram: #e1306c;
+    --facebook: #1877f2;
+    --youtube: #ff0000;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 220px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 0;
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    padding: 0 24px 28px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo span { font-size: 0.65rem; font-weight: 400; display: block; opacity: 0.6; -webkit-text-fill-color: #7878a0; background: none; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+
+  .nav { padding: 18px 12px; flex: 1; }
+  .nav-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); padding: 0 12px; margin: 18px 0 8px; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    transition: all 0.18s;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: #6c63ff18; color: var(--accent); }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .api-badge {
+    margin: 16px 12px;
+    background: #6c63ff12;
+    border: 1px solid #6c63ff30;
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  .api-badge strong { display: block; color: var(--accent); font-size: 0.8rem; margin-bottom: 3px; }
+
+  /* ── MAIN ── */
+  .main {
+    flex: 1;
+    margin-left: 220px;
+    padding: 36px 40px;
+    max-width: calc(100vw - 220px);
+  }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 36px;
+  }
+  .page-title { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 700; }
+  .page-title span { color: var(--text-muted); font-weight: 400; font-size: 1rem; display: block; font-family: 'DM Sans', sans-serif; margin-top: 2px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    border: none;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #7d75ff; transform: translateY(-1px); box-shadow: 0 8px 24px #6c63ff44; }
+  .btn-ghost { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--border-hover); }
+
+  /* ── STATS ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--border-hover); }
+  .stat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .stat-card:nth-child(1)::before { background: var(--accent); }
+  .stat-card:nth-child(2)::before { background: var(--accent3); }
+  .stat-card:nth-child(3)::before { background: var(--accent2); }
+  .stat-card:nth-child(4)::before { background: #f9c74f; }
+
+  .stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 10px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; }
+  .stat-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+  .stat-sub.up { color: var(--accent3); }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex; gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    width: fit-content;
+    margin-bottom: 28px;
+  }
+  .tab {
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.18s;
+    border: none;
+    background: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .tab.active { background: var(--accent); color: #fff; }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* ── CONTENT GRID ── */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* ── COMPOSE CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; }
+  .card-body { padding: 24px; }
+
+  /* ── COMPOSE ── */
+  .compose-area {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: 110px;
+  }
+  .compose-area:focus { border-color: var(--accent); }
+  .compose-area::placeholder { color: var(--text-dim); }
+
+  /* ── PLATFORM PILLS ── */
+  .platform-select { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+
+  .platform-pill {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 14px;
+    border-radius: 99px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    user-select: none;
+  }
+  .platform-pill.selected { border-color: currentColor; }
+  .platform-pill.tiktok { --c: var(--tiktok); }
+  .platform-pill.instagram { --c: var(--instagram); }
+  .platform-pill.facebook { --c: var(--facebook); }
+  .platform-pill.youtube { --c: var(--youtube); }
+  .platform-pill.selected { color: var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); border-color: color-mix(in srgb, var(--c) 35%, transparent); }
+
+  .platform-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+  /* ── PROFILE CHECKBOXES ── */
+  .profile-list { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 20px; }
+  .profile-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: border-color 0.18s;
+  }
+  .profile-item:hover { border-color: var(--border-hover); }
+  .profile-item.checked { border-color: #6c63ff40; background: #6c63ff08; }
+
+  .profile-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+  .profile-info { flex: 1; }
+  .profile-name { font-size: 0.85rem; font-weight: 500; }
+  .profile-platform { font-size: 0.72rem; color: var(--text-muted); }
+
+  .check-box {
+    width: 18px; height: 18px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.18s;
+  }
+  .profile-item.checked .check-box { background: var(--accent); border-color: var(--accent); }
+
+  /* ── SCHEDULE ── */
+  .schedule-row { display: flex; gap: 10px; margin: 16px 0; }
+  .input-group { flex: 1; }
+  .input-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
+  .input-field {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.2s;
+    color-scheme: dark;
+  }
+  .input-field:focus { border-color: var(--accent); }
+
+  /* ── UPLOAD ZONE ── */
+  .upload-zone {
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 16px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .upload-zone:hover { border-color: var(--accent); background: #6c63ff06; }
+  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-icon { font-size: 1.8rem; margin-bottom: 8px; }
+  .upload-text { font-size: 0.85rem; color: var(--text-muted); }
+  .upload-text strong { color: var(--accent); }
+  .upload-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .preview-thumb {
+    width: 60px; height: 60px; border-radius: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .preview-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* ── QUEUE SIDEBAR ── */
+  .queue-item {
+    padding: 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+    transition: border-color 0.18s;
+  }
+  .queue-item:hover { border-color: var(--border-hover); }
+  .queue-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .queue-title { font-size: 0.82rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+  .queue-time { font-size: 0.7rem; color: var(--text-muted); }
+  .queue-platforms { display: flex; gap: 5px; flex-wrap: wrap; }
+  .platform-badge {
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    border-radius: 99px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .platform-badge.tiktok { background: #ff004f20; color: var(--tiktok); }
+  .platform-badge.instagram { background: #e1306c20; color: var(--instagram); }
+  .platform-badge.facebook { background: #1877f220; color: var(--facebook); }
+  .platform-badge.youtube { background: #ff000020; color: var(--youtube); }
+
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 5px;
+  }
+  .status-scheduled { background: #f9c74f; }
+  .status-published { background: var(--accent3); }
+  .status-failed { background: var(--accent2); }
+
+  /* ── API CONFIG ── */
+  .api-config-section { padding: 0; }
+  .config-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+  }
+  .config-row:last-child { border-bottom: none; }
+  .config-label { color: var(--text-muted); }
+  .config-value { font-weight: 500; color: var(--text); }
+  .toggle {
+    width: 38px; height: 20px;
+    background: var(--surface2);
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle.on { background: var(--accent); border-color: var(--accent); }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s;
+  }
+  .toggle.on::after { transform: translateX(18px); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 28px; right: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 0.875rem;
+    box-shadow: 0 20px 60px #00000088;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 999;
+    max-width: 340px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-icon { font-size: 1.2rem; }
+  .toast-text strong { display: block; }
+  .toast-text span { color: var(--text-muted); font-size: 0.8rem; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: #00000088;
+    backdrop-filter: blur(4px);
+    z-index: 500;
+    display: none; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    width: 480px;
+    max-width: 90vw;
+    animation: modalIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes modalIn { from { transform: scale(0.9) translateY(20px); opacity: 0; } }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
+  .modal-sub { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 24px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+  /* ── ANIMATED PROGRESS ── */
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .loading { animation: pulse 1.5s infinite; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  /* ── SECTION HEADER ── */
+  .section-sep { display: flex; align-items: center; gap: 12px; margin: 20px 0 12px; }
+  .section-sep-line { flex: 1; height: 1px; background: var(--border); }
+  .section-sep-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dim); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">AutoPost<span>Powered by Late API</span></div>
+  <nav class="nav">
+    <div class="nav-label">Publicação</div>
+    <div class="nav-item active" onclick="showSection('compose')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Novo Post
+    </div>
+    <div class="nav-item" onclick="showSection('queue')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Agendados
+    </div>
+    <div class="nav-item" onclick="showSection('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Histórico
+    </div>
+    <div class="nav-label">Configuração</div>
+    <div class="nav-item" onclick="showSection('profiles')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Perfis
+    </div>
+    <div class="nav-item" onclick="showSection('settings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Configurações
+    </div>
+  </nav>
+  <div class="api-badge">
+    <strong>🔑 Late API</strong>
+    Conecte sua chave em Configurações para ativar
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- SECTION: COMPOSE -->
+  <div id="section-compose">
+    <div class="topbar">
+      <div>
+        <h1 class="page-title">Novo Post <span>Publique em todas as redes de uma vez</span></h1>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" onclick="saveDraft()">💾 Salvar rascunho</button>
+        <button class="btn btn-primary" onclick="publishPost()">🚀 Publicar agora</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Posts este mês</div>
+        <div class="stat-value" id="stat-posts">0</div>
+        <div class="stat-sub up">↑ via API Late</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Perfis conectados</div>
+        <div class="stat-value" id="stat-profiles">0</div>
+        <div class="stat-sub">em <span id="stat-platforms">0</span> plataformas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Agendados</div>
+        <div class="stat-value" id="stat-scheduled">0</div>
+        <div class="stat-sub">próximas 24h</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Taxa de sucesso</div>
+        <div class="stat-value">—</div>
+        <div class="stat-sub">após primeiro post</div>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <!-- LEFT: Compose -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">✍️ Conteúdo do post</span>
+            <span id="char-count" style="font-size:0.75rem;color:var(--text-muted)">0 caracteres</span>
+          </div>
+          <div class="card-body">
+            <textarea class="compose-area" id="post-caption" placeholder="Escreva sua legenda aqui... #hashtags @menções" oninput="updateCharCount()"></textarea>
+
+            <div class="section-sep"><div class="section-sep-line"></div><div class="section-sep-label">Mídia</div><div class="section-sep-line"></div></div>
+
+            <div class="upload-zone" id="upload-zone">
+              <input type="file" accept="video/*,image/*" multiple onchange="handleFileSelect(event)">
+              <div class="upload-icon">📁</div>
+              <div class="upload-text"><strong>Clique para selecionar</strong> ou arraste aqui<br>Vídeos (MP4, MOV) · Imagens (JPG, PNG)</div>
+            </div>
+            <div class="upload-preview" id="upload-preview"></div>
+
+            <div class="section-sep"><div class="section-sep-line"></div><div class="section-sep-label">Plataformas</div><div class="section-sep-line"></div></div>
+
+            <div class="platform-select">
+              <div class="platform-pill tiktok selected" onclick="togglePlatform(this,'tiktok')">
+                <div class="platform-dot"></div> TikTok
+              </div>
+              <div class="platform-pill instagram selected" onclick="togglePlatform(this,'instagram')">
+                <div class="platform-dot"></div> Instagram
+              </div>
+              <div class="platform-pill facebook selected" onclick="togglePlatform(this,'facebook')">
+                <div class="platform-dot"></div> Facebook
+              </div>
+              <div class="platform-pill youtube selected" onclick="togglePlatform(this,'youtube')">
+                <div class="platform-dot"></div> YouTube Shorts
+              </div>
+            </div>
+
+            <div class="section-sep"><div class="section-sep-line"></div><div class="section-sep-label">Perfis</div><div class="section-sep-line"></div></div>
+
+            <div class="profile-list" id="profile-list-compose">
+              <div style="color:var(--text-muted);font-size:0.85rem;padding:10px 0">
+                Nenhum perfil adicionado ainda. Vá em <strong style="color:var(--accent);cursor:pointer" onclick="showSection('profiles')">Perfis</strong> para adicionar.
+              </div>
+            </div>
+
+            <div class="section-sep"><div class="section-sep-line"></div><div class="section-sep-label">Agendamento</div><div class="section-sep-line"></div></div>
+
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px">
+              <div style="display:flex;gap:8px">
+                <div class="tab active" onclick="setScheduleMode('now',this)">Agora</div>
+                <div class="tab" onclick="setScheduleMode('later',this)">Agendar</div>
+              </div>
+            </div>
+
+            <div id="schedule-fields" style="display:none">
+              <div class="schedule-row">
+                <div class="input-group">
+                  <div class="input-label">Data</div>
+                  <input type="date" class="input-field" id="schedule-date">
+                </div>
+                <div class="input-group">
+                  <div class="input-label">Horário</div>
+                  <input type="time" class="input-field" id="schedule-time">
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Queue -->
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <span class="card-title">📋 Fila de posts</span>
+            <span id="queue-count" style="font-size:0.75rem;color:var(--text-muted)">0 posts</span>
+          </div>
+          <div class="card-body" id="queue-sidebar">
+            <div style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:20px 0;opacity:0.6">
+              Sua fila está vazia.<br>Agende seu primeiro post!
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="card-title">⚡ Dicas rápidas</span></div>
+          <div class="card-body" style="font-size:0.8rem;color:var(--text-muted);line-height:1.7">
+            <p>🎯 <strong style="color:var(--text)">TikTok Business</strong> — necessário para publicação automática sem confirmação manual</p>
+            <br>
+            <p>📐 <strong style="color:var(--text)">YouTube Shorts</strong> — vídeos verticais até 60s (9:16, 1080×1920)</p>
+            <br>
+            <p>🔑 Configure sua <strong style="color:var(--accent)">API Key do Late</strong> em Configurações para ativar as publicações reais</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: PROFILES -->
+  <div id="section-profiles" style="display:none">
+    <div class="topbar">
+      <h1 class="page-title">Perfis <span>Gerencie suas contas conectadas</span></h1>
+      <button class="btn btn-primary" onclick="openAddProfile()">+ Adicionar perfil</button>
+    </div>
+
+    <div id="profiles-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+      <div style="color:var(--text-muted);font-size:0.9rem;grid-column:1/-1;padding:40px 0;text-align:center;opacity:0.6">
+        Nenhum perfil adicionado ainda.<br>Clique em <strong style="color:var(--accent)">+ Adicionar perfil</strong> para começar.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: SETTINGS -->
+  <div id="section-settings" style="display:none">
+    <div class="topbar">
+      <h1 class="page-title">Configurações <span>API e preferências</span></h1>
+    </div>
+
+    <div class="content-grid">
+      <div>
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header"><span class="card-title">🔑 Late API</span></div>
+          <div class="card-body">
+            <div class="input-label">API Key</div>
+            <div style="display:flex;gap:10px">
+              <input type="password" class="input-field" id="api-key-input" placeholder="late_xxxxxxxxxxxxxxxx" style="flex:1">
+              <button class="btn btn-primary" onclick="saveApiKey()">Salvar</button>
+            </div>
+            <p style="font-size:0.78rem;color:var(--text-muted);margin-top:10px">
+              Obtenha sua chave em <a href="https://getlate.dev" target="_blank" style="color:var(--accent)">getlate.dev</a> → Dashboard → API Keys
+            </p>
+            <div id="api-status" style="margin-top:12px;font-size:0.82rem;display:none">
+              <span class="status-dot status-published"></span> API Key salva e ativa
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="card-title">⚙️ Preferências</span></div>
+          <div class="card-body">
+            <div class="api-config-section">
+              <div class="config-row">
+                <span class="config-label">Notificação ao publicar</span>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="config-row">
+                <span class="config-label">Salvar rascunhos automaticamente</span>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="config-row">
+                <span class="config-label">Fuso horário</span>
+                <span class="config-value">America/Sao_Paulo</span>
+              </div>
+              <div class="config-row">
+                <span class="config-label">Versão da plataforma</span>
+                <span class="config-value">1.0.0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">📖 Como começar</span></div>
+          <div class="card-body" style="font-size:0.82rem;color:var(--text-muted);line-height:1.8">
+            <p><strong style="color:var(--accent)">1.</strong> Crie conta em <strong>getlate.dev</strong></p>
+            <p><strong style="color:var(--accent)">2.</strong> Conecte suas redes no dashboard do Late</p>
+            <p><strong style="color:var(--accent)">3.</strong> Copie sua API Key e cole acima</p>
+            <p><strong style="color:var(--accent)">4.</strong> Adicione seus perfis em <strong>Perfis</strong></p>
+            <p><strong style="color:var(--accent)">5.</strong> Crie seu primeiro post!</p>
+            <br>
+            <p style="background:#6c63ff12;border:1px solid #6c63ff30;border-radius:8px;padding:10px;color:var(--text)">
+              💡 O Late API aceita <strong>profile IDs</strong> de cada conta. Você os encontra no dashboard deles após conectar suas redes.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: QUEUE -->
+  <div id="section-queue" style="display:none">
+    <div class="topbar">
+      <h1 class="page-title">Agendados <span>Posts programados para publicação</span></h1>
+    </div>
+    <div id="queue-full" class="card">
+      <div class="card-body">
+        <div style="color:var(--text-muted);text-align:center;padding:40px;opacity:0.6">Nenhum post agendado ainda.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: HISTORY -->
+  <div id="section-history" style="display:none">
+    <div class="topbar">
+      <h1 class="page-title">Histórico <span>Posts publicados anteriormente</span></h1>
+    </div>
+    <div id="history-list" class="card">
+      <div class="card-body">
+        <div style="color:var(--text-muted);text-align:center;padding:40px;opacity:0.6">Nenhum post publicado ainda.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL: Add Profile -->
+<div class="modal-overlay" id="modal-add-profile">
+  <div class="modal">
+    <div class="modal-title">Adicionar perfil</div>
+    <div class="modal-sub">Informe os dados do perfil que deseja gerenciar</div>
+
+    <div class="input-group" style="margin-bottom:14px">
+      <div class="input-label">Plataforma</div>
+      <select class="input-field" id="new-profile-platform">
+        <option value="tiktok">TikTok</option>
+        <option value="instagram">Instagram</option>
+        <option value="facebook">Facebook</option>
+        <option value="youtube">YouTube Shorts</option>
+      </select>
+    </div>
+    <div class="input-group" style="margin-bottom:14px">
+      <div class="input-label">Nome do perfil / @usuário</div>
+      <input type="text" class="input-field" id="new-profile-name" placeholder="@meuperfil">
+    </div>
+    <div class="input-group" style="margin-bottom:4px">
+      <div class="input-label">Profile ID (Late API)</div>
+      <input type="text" class="input-field" id="new-profile-id" placeholder="late_profile_xxxxxxxx">
+    </div>
+    <p style="font-size:0.73rem;color:var(--text-muted);margin:6px 0 0">Encontre em getlate.dev → Connected Profiles</p>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="addProfile()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon">✅</span>
+  <div class="toast-text">
+    <strong id="toast-title">Publicado!</strong>
+    <span id="toast-sub">Post enviado com sucesso</span>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+const state = {
+  apiKey: localStorage.getItem('late_api_key') || '',
+  profiles: JSON.parse(localStorage.getItem('ap_profiles') || '[]'),
+  queue: JSON.parse(localStorage.getItem('ap_queue') || '[]'),
+  history: JSON.parse(localStorage.getItem('ap_history') || '[]'),
+  scheduleMode: 'now',
+  selectedFiles: [],
+};
+
+function save() {
+  localStorage.setItem('late_api_key', state.apiKey);
+  localStorage.setItem('ap_profiles', JSON.stringify(state.profiles));
+  localStorage.setItem('ap_queue', JSON.stringify(state.queue));
+  localStorage.setItem('ap_history', JSON.stringify(state.history));
+}
+
+// ── NAV ──
+function showSection(name) {
+  ['compose','profiles','settings','queue','history'].forEach(s => {
+    document.getElementById('section-'+s).style.display = s === name ? '' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const items = document.querySelectorAll('.nav-item');
+  const map = { compose:0, queue:1, history:2, profiles:3, settings:4 };
+  if (items[map[name]]) items[map[name]].classList.add('active');
+  if (name === 'profiles') renderProfiles();
+  if (name === 'queue') renderQueueFull();
+  if (name === 'history') renderHistory();
+}
+
+// ── CHAR COUNT ──
+function updateCharCount() {
+  const n = document.getElementById('post-caption').value.length;
+  document.getElementById('char-count').textContent = n + ' caracteres';
+}
+
+// ── PLATFORM TOGGLE ──
+function togglePlatform(el, name) {
+  el.classList.toggle('selected');
+}
+
+// ── SCHEDULE MODE ──
+function setScheduleMode(mode, el) {
+  state.scheduleMode = mode;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('schedule-fields').style.display = mode === 'later' ? '' : 'none';
+}
+
+// ── FILE UPLOAD ──
+function handleFileSelect(e) {
+  const files = Array.from(e.target.files);
+  state.selectedFiles = files;
+  const preview = document.getElementById('upload-preview');
+  preview.innerHTML = '';
+  files.forEach(f => {
+    const thumb = document.createElement('div');
+    thumb.className = 'preview-thumb';
+    if (f.type.startsWith('image/')) {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(f);
+      thumb.appendChild(img);
+    } else {
+      thumb.textContent = '🎬';
+    }
+    preview.appendChild(thumb);
+  });
+}
+
+// ── PUBLISH ──
+async function publishPost() {
+  const caption = document.getElementById('post-caption').value.trim();
+  if (!caption && state.selectedFiles.length === 0) {
+    showToast('⚠️', 'Conteúdo vazio', 'Adicione uma legenda ou mídia antes de publicar', 'var(--accent2)');
+    return;
+  }
+
+  const selectedProfiles = [...document.querySelectorAll('#profile-list-compose .profile-item.checked')];
+  if (selectedProfiles.length === 0) {
+    showToast('⚠️', 'Nenhum perfil selecionado', 'Selecione ao menos um perfil para publicar', 'var(--accent2)');
+    return;
+  }
+
+  if (!state.apiKey) {
+    showToast('🔑', 'API Key não configurada', 'Configure sua chave Late em Configurações', 'var(--accent)');
+    return;
+  }
+
+  const profileIds = selectedProfiles.map(el => el.dataset.profileId);
+  const isScheduled = state.scheduleMode === 'later';
+  let scheduledAt = null;
+
+  if (isScheduled) {
+    const d = document.getElementById('schedule-date').value;
+    const t = document.getElementById('schedule-time').value;
+    if (!d || !t) { showToast('⚠️', 'Data/hora inválida', 'Preencha data e horário', 'var(--accent2)'); return; }
+    scheduledAt = new Date(d + 'T' + t).toISOString();
+  }
+
+  showToast('⏳', 'Publicando...', 'Enviando para as redes selecionadas');
+
+  try {
+    // Late API call
+    const body = {
+      profiles: profileIds,
+      post: { caption }
+    };
+    if (scheduledAt) body.scheduledAt = scheduledAt;
+
+    const res = await fetch('https://api.getlate.dev/v1/posts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + state.apiKey
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const post = {
+        id: data.id || Date.now(),
+        caption,
+        profiles: selectedProfiles.map(el => ({ id: el.dataset.profileId, name: el.querySelector('.profile-name').textContent })),
+        platforms: [...document.querySelectorAll('.platform-pill.selected')].map(el => el.classList[1]),
+        createdAt: new Date().toISOString(),
+        scheduledAt,
+        status: isScheduled ? 'scheduled' : 'published'
+      };
+
+      if (isScheduled) { state.queue.push(post); }
+      else { state.history.push(post); }
+      updateStats();
+      save();
+      renderSidebar();
+
+      document.getElementById('post-caption').value = '';
+      document.getElementById('upload-preview').innerHTML = '';
+      state.selectedFiles = [];
+      updateCharCount();
+
+      showToast('✅', isScheduled ? 'Post agendado!' : 'Post publicado!',
+        isScheduled ? 'Será enviado em ' + new Date(scheduledAt).toLocaleString('pt-BR') : 'Publicado em ' + post.platforms.join(', '));
+    } else {
+      const err = await res.json().catch(() => ({}));
+      showToast('❌', 'Erro na API', err.message || 'Verifique sua API Key e tente novamente', 'var(--accent2)');
+    }
+  } catch (err) {
+    // Demo mode (no real API key / network)
+    const post = {
+      id: Date.now(),
+      caption,
+      profiles: selectedProfiles.map(el => ({ id: el.dataset.profileId, name: el.querySelector('.profile-name').textContent })),
+      platforms: [...document.querySelectorAll('.platform-pill.selected')].map(el => el.classList[1]),
+      createdAt: new Date().toISOString(),
+      scheduledAt,
+      status: isScheduled ? 'scheduled' : 'published'
+    };
+    if (isScheduled) state.queue.push(post); else state.history.push(post);
+    updateStats(); save(); renderSidebar();
+    document.getElementById('post-caption').value = '';
+    updateCharCount();
+    showToast('🧪', isScheduled ? 'Agendado (demo)' : 'Simulado (demo)', 'Configure a API Key para publicação real');
+  }
+}
+
+function saveDraft() {
+  showToast('💾', 'Rascunho salvo', 'Você pode continuar editando depois');
+}
+
+// ── PROFILES ──
+const PLATFORM_COLORS = { tiktok:'#ff004f', instagram:'#e1306c', facebook:'#1877f2', youtube:'#ff0000' };
+const PLATFORM_NAMES = { tiktok:'TikTok', instagram:'Instagram', facebook:'Facebook', youtube:'YouTube Shorts' };
+const PLATFORM_EMOJIS = { tiktok:'♪', instagram:'📸', facebook:'f', youtube:'▶' };
+
+function openAddProfile() { document.getElementById('modal-add-profile').classList.add('open'); }
+function closeModal() { document.getElementById('modal-add-profile').classList.remove('open'); }
+
+function addProfile() {
+  const platform = document.getElementById('new-profile-platform').value;
+  const name = document.getElementById('new-profile-name').value.trim();
+  const profileId = document.getElementById('new-profile-id').value.trim();
+  if (!name) { showToast('⚠️','Nome obrigatório','Informe o @usuário do perfil','var(--accent2)'); return; }
+
+  state.profiles.push({ id: Date.now(), platform, name, profileId });
+  save(); closeModal();
+  document.getElementById('new-profile-name').value = '';
+  document.getElementById('new-profile-id').value = '';
+  renderProfiles(); renderComposeProfiles(); updateStats();
+  showToast('✅', 'Perfil adicionado!', name + ' adicionado com sucesso');
+}
+
+function renderProfiles() {
+  const grid = document.getElementById('profiles-grid');
+  if (state.profiles.length === 0) {
+    grid.innerHTML = '<div style="color:var(--text-muted);font-size:0.9rem;grid-column:1/-1;padding:40px 0;text-align:center;opacity:0.6">Nenhum perfil adicionado ainda.<br>Clique em <strong style="color:var(--accent)">+ Adicionar perfil</strong> para começar.</div>';
+    return;
+  }
+  grid.innerHTML = state.profiles.map(p => `
+    <div class="card" style="position:relative">
+      <div style="padding:20px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div class="profile-avatar" style="background:${PLATFORM_COLORS[p.platform]}22;color:${PLATFORM_COLORS[p.platform]};font-size:1.1rem">
+            ${PLATFORM_EMOJIS[p.platform]}
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:0.9rem">${p.name}</div>
+            <div style="font-size:0.72rem;color:var(--text-muted)">${PLATFORM_NAMES[p.platform]}</div>
+          </div>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+          ${p.profileId || 'ID não configurado'}
+        </div>
+      </div>
+      <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end">
+        <button class="btn btn-ghost" style="font-size:0.75rem;padding:6px 12px" onclick="removeProfile(${p.id})">🗑 Remover</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function removeProfile(id) {
+  state.profiles = state.profiles.filter(p => p.id !== id);
+  save(); renderProfiles(); renderComposeProfiles(); updateStats();
+}
+
+function renderComposeProfiles() {
+  const list = document.getElementById('profile-list-compose');
+  if (state.profiles.length === 0) {
+    list.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;padding:10px 0">Nenhum perfil adicionado ainda. Vá em <strong style="color:var(--accent);cursor:pointer" onclick="showSection(\'profiles\')">Perfis</strong> para adicionar.</div>';
+    return;
+  }
+  list.innerHTML = state.profiles.map(p => `
+    <div class="profile-item checked" data-profile-id="${p.profileId || p.id}" onclick="toggleProfile(this)">
+      <div class="profile-avatar" style="background:${PLATFORM_COLORS[p.platform]}22;color:${PLATFORM_COLORS[p.platform]}">
+        ${PLATFORM_EMOJIS[p.platform]}
+      </div>
+      <div class="profile-info">
+        <div class="profile-name">${p.name}</div>
+        <div class="profile-platform">${PLATFORM_NAMES[p.platform]}</div>
+      </div>
+      <div class="check-box">
+        <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleProfile(el) { el.classList.toggle('checked'); }
+
+// ── QUEUE ──
+function renderSidebar() {
+  const sb = document.getElementById('queue-sidebar');
+  const countEl = document.getElementById('queue-count');
+  const all = [...state.queue.slice(-5).reverse()];
+  countEl.textContent = state.queue.length + ' posts';
+  if (all.length === 0) {
+    sb.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:20px 0;opacity:0.6">Sua fila está vazia.<br>Agende seu primeiro post!</div>';
+    return;
+  }
+  sb.innerHTML = all.map(p => `
+    <div class="queue-item">
+      <div class="queue-header">
+        <span class="queue-title">${p.caption || '(sem legenda)'}</span>
+        <span class="queue-time">${p.scheduledAt ? new Date(p.scheduledAt).toLocaleDateString('pt-BR') : 'Agora'}</span>
+      </div>
+      <div class="queue-platforms">
+        ${p.platforms.map(pl => `<span class="platform-badge ${pl}">${PLATFORM_NAMES[pl]||pl}</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderQueueFull() {
+  const el = document.getElementById('queue-full');
+  if (state.queue.length === 0) {
+    el.querySelector('.card-body').innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:40px;opacity:0.6">Nenhum post agendado ainda.</div>';
+    return;
+  }
+  el.querySelector('.card-body').innerHTML = state.queue.map(p => `
+    <div class="queue-item" style="margin-bottom:10px">
+      <div class="queue-header">
+        <span class="queue-title">${p.caption || '(sem legenda)'}</span>
+        <span class="queue-time"><span class="status-dot status-scheduled"></span>${p.scheduledAt ? new Date(p.scheduledAt).toLocaleString('pt-BR') : '—'}</span>
+      </div>
+      <div class="queue-platforms">${p.platforms.map(pl => `<span class="platform-badge ${pl}">${PLATFORM_NAMES[pl]||pl}</span>`).join('')}</div>
+    </div>
+  `).join('');
+}
+
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  if (state.history.length === 0) {
+    el.querySelector('.card-body').innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:40px;opacity:0.6">Nenhum post publicado ainda.</div>';
+    return;
+  }
+  el.querySelector('.card-body').innerHTML = state.history.slice().reverse().map(p => `
+    <div class="queue-item" style="margin-bottom:10px">
+      <div class="queue-header">
+        <span class="queue-title">${p.caption || '(sem legenda)'}</span>
+        <span class="queue-time"><span class="status-dot status-published"></span>${new Date(p.createdAt).toLocaleString('pt-BR')}</span>
+      </div>
+      <div class="queue-platforms">${p.platforms.map(pl => `<span class="platform-badge ${pl}">${PLATFORM_NAMES[pl]||pl}</span>`).join('')}</div>
+    </div>
+  `).join('');
+}
+
+// ── STATS ──
+function updateStats() {
+  const thisMonth = state.history.filter(p => new Date(p.createdAt).getMonth() === new Date().getMonth()).length;
+  document.getElementById('stat-posts').textContent = thisMonth;
+  document.getElementById('stat-profiles').textContent = state.profiles.length;
+  const platforms = [...new Set(state.profiles.map(p => p.platform))].length;
+  document.getElementById('stat-platforms').textContent = platforms;
+  document.getElementById('stat-scheduled').textContent = state.queue.length;
+}
+
+// ── API KEY ──
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  state.apiKey = key;
+  save();
+  const status = document.getElementById('api-status');
+  status.style.display = 'block';
+  showToast('🔑', 'API Key salva!', 'Você já pode publicar nas suas redes');
+}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(icon, title, sub, color) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-sub').textContent = sub;
+  if (color) t.style.borderColor = color + '44';
+  else t.style.borderColor = '';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── INIT ──
+if (state.apiKey) {
+  document.getElementById('api-key-input').value = state.apiKey;
+  document.getElementById('api-status').style.display = 'block';
+}
+renderComposeProfiles();
+renderSidebar();
+updateStats();
+</script>
+</body>
+</html>
